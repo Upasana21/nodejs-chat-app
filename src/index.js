@@ -29,8 +29,8 @@ io.on('connection',(socket)=>{
         socket.join(user.room); //join the room to chat
         //to()==> send msg to specified room
 
-        socket.emit('message',generateMessage(user.username,'Welcome!!!'));
-        socket.broadcast.to(user.room).emit('message',generateMessage(user.username,`${user.username} has joined!!!`));
+        socket.emit('message',generateMessage('Admin','Welcome!!!'));
+        socket.broadcast.to(user.room).emit('message',generateMessage('Admin',`${user.username} has joined!!!`));
 
         //get chatroom users list
         io.to(user.room).emit('usersInRoom',getUsersInRoom(user.room))
@@ -58,7 +58,7 @@ io.on('connection',(socket)=>{
     socket.on('disconnect',()=>{
         const user= removeUser(socket.id);
         if(user){ //will display msg to user who are part of the chat room
-            io.to(user.room).emit('message',generateMessage(`${user.username} has left!`));            
+            io.to(user.room).emit('message',generateMessage('Admin',`${user.username} has left!`));            
         }
     })
 
