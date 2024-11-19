@@ -33,7 +33,10 @@ io.on('connection',(socket)=>{
         socket.broadcast.to(user.room).emit('message',generateMessage('Admin',`${user.username} has joined!!!`));
 
         //get chatroom users list
-        io.to(user.room).emit('usersInRoom',getUsersInRoom(user.room))
+        io.to(user.room).emit('roomData',{
+            room:user.room,
+            users:getUsersInRoom(user.room)
+        })
         callback();
     })
 
@@ -58,7 +61,11 @@ io.on('connection',(socket)=>{
     socket.on('disconnect',()=>{
         const user= removeUser(socket.id);
         if(user){ //will display msg to user who are part of the chat room
-            io.to(user.room).emit('message',generateMessage('Admin',`${user.username} has left!`));            
+            io.to(user.room).emit('message',generateMessage('Admin',`${user.username} has left!`)); 
+            io.to(user.room).emit('roomData',{
+                room:user.room,
+                users:getUsersInRoom(user.room)
+            })           
         }
     })
 

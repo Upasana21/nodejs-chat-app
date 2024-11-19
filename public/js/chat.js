@@ -9,16 +9,14 @@ const $messages = document.querySelector("#messages");
 //templates
 const messageTemplate = document.querySelector("#message-template").innerHTML;
 const locationTemplate = document.querySelector("#location-template").innerHTML;
-const usersInRoomList=document.querySelector("#usersInRoom");
+const sidebarTemplate=document.querySelector("#sidebar-template").innerHTML;
 
 //url query
 const { username,room } = Qs.parse(location.search,{ignoreQueryPrefix:true})
 
 // console.log(Qs.parse(location.search,{ignoreQueryPrefix:true}))
-console.log(usersInRoomList)
 
 socket.on("message", (message) => {
-  console.log(username,message)
   const html = Mustache.render(messageTemplate, {
     username:message.username,
     message: message.text,
@@ -27,13 +25,17 @@ socket.on("message", (message) => {
   $messages.insertAdjacentHTML("beforeend", html);
 });
 
-//get chatroom users list
-// socket.on('usersInRoom',(userslist)=>{
-//   for(let user of userslist){
-//     usersInRoomList.insertAdjacentHTML("beforeend", user.username);
-//     // usersInRoomList.innerHTML=user.username
-//   }
-// })
+//GET CHATROOM USERS DATA
+socket.on('roomData',({ room, users })=>{
+  const html=Mustache.render(sidebarTemplate,{
+    room,
+    users
+  })
+  /*replace the data that's already there and not insert it adjacently to what already exists 
+  unlike insertAdjacentHTML*/
+  document.querySelector('#sidebar').innerHTML=html;
+  
+})
 
 $messageForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -47,7 +49,8 @@ $messageForm.addEventListener("submit", (event) => {
     if (error) {
       return console.log(error);
     }
-    // console.log("Message Delivered!!!"); //acknowledge from client to server
+    // console.log("Message Delivered!!!"); 
+    //acknowledge from client to server
   });
   $messageInput.value = "";
   $messageInput.focus();
@@ -55,8 +58,8 @@ $messageForm.addEventListener("submit", (event) => {
 
 //location
 socket.on("locationMessage", (message) => {
-  // console.log(message);
-  const html = Mustache.render(locationTemplate, { //template will get data(username,msg0), n display in html
+  const html = Mustache.render(locationTemplate, { 
+    //template will get data(username,msg0), n display in html
     username:message.username,
     url:message.url,
     createdAt:moment(message.createdAt).format('h:mm a') 
