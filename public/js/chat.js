@@ -16,6 +16,36 @@ const { username,room } = Qs.parse(location.search,{ignoreQueryPrefix:true})
 
 // console.log(Qs.parse(location.search,{ignoreQueryPrefix:true}))
 
+//AUTO-SCROLL
+const autoScroll= ()=>{
+  //new message
+  const $newMessage=$messages.lastElementChild;
+
+  //get styles list , we are doing this to get margin value dynamically and add it to the height
+  const getStyles=getComputedStyle($newMessage);
+  const getMargin=parseInt(getStyles.marginBottom);   
+
+  //get new message height
+  const newMessageHeight=$newMessage.offsetHeight + getMargin; 
+  // $newMessage.offsetHeight provide border & padding height as integer
+
+  //visible height on screen
+  const visibleHeight=$messages.offsetHeight;
+
+  //height of message container
+  const containerHeight=$messages.scrollHeight; //this will give total height we can scroll through
+
+  //distance scrolled from top? //$messages.scrollTop (how far )=> 0, 
+  const scrollOffset= $messages.scrollTop + visibleHeight;
+  
+  if(containerHeight-newMessageHeight -1 <= scrollOffset){ //can use Math.round()too and remove -1
+    $messages.scrollTop=$messages.scrollHeight; //this will push to downn
+   
+    //$messages.scrollTop =>how far down we scrolled (top:0)
+    //$messages.scrollHeight => scrolle down all the way
+  }
+}
+
 socket.on("message", (message) => {
   const html = Mustache.render(messageTemplate, {
     username:message.username,
@@ -23,6 +53,7 @@ socket.on("message", (message) => {
     createdAt: moment(message.createdAt).format("h:mm a"),
   });
   $messages.insertAdjacentHTML("beforeend", html);
+  autoScroll();
 });
 
 //GET CHATROOM USERS DATA
@@ -65,6 +96,7 @@ socket.on("locationMessage", (message) => {
     createdAt:moment(message.createdAt).format('h:mm a') 
   });
   $messages.insertAdjacentHTML("beforeend", html);
+  autoScroll();
 });
 
 //sending coordinates to server
